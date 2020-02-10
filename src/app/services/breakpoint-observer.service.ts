@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { fromEvent, Observable } from 'rxjs';
 import { startWith, map, distinctUntilChanged, shareReplay } from 'rxjs/operators';
+import { WindowTypes } from '../model';
 
 
 const QUERY: Map<string, string> = new Map([
-  ['xl', '(min-width: 1200px)'],
-  ['lg', '(min-width: 992px)'],
-  ['md', '(min-width: 768px)'],
-  ['sm', '(min-width: 576px)'],
-  ['xs', '(min-width: 0px)'],
+  [WindowTypes.DESKTOP, '(min-width: 1200px)'],
+  [WindowTypes.LAPTOP, '(min-width: 992px)'],
+  [WindowTypes.TABLETS, '(min-width: 768px)'],
+  [WindowTypes.LARGE_PHONE, '(min-width: 600px)'],
+  [WindowTypes.PHONE, '(max-width: 600px)'],
 ]);
 
 @Injectable({

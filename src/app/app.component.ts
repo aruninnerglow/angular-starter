@@ -2,12 +2,13 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import { Observable } from 'rxjs';
-import {  DELETE_ITEM_MUTATION, CREATE_ITEM_MUTATION, UPDATE_ITEM_MUTATION, GET_ALL_ITEMS, GET_ALL_ITEMS_MD } from './items.gql';
+import {  DELETE_ITEM_MUTATION, CREATE_ITEM_MUTATION, UPDATE_ITEM_MUTATION, GET_ALL_ITEMS, } from './items.gql';
 import { GridOptions } from 'ag-grid-community';
 import { NgForm } from '@angular/forms';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { BreakpointObserverService } from './services/breakpoint-observer.service';
 import { AgGridAngular } from 'ag-grid-angular';
+import { WindowTypes } from './model';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +24,7 @@ export class AppComponent implements OnInit {
   slectedItem: any;
   latestSize: string;
   actionType = 'Add';
+  deviceTypes: any;
   columnDefs = [];
   cellRenderers = [
     { headerName: 'EDIT', field: 'edit', cellRenderer: this.editCellRenderer, cellStyle: { 'text-align': 'center' }, width: 80},
@@ -33,6 +35,39 @@ export class AppComponent implements OnInit {
   constructor(private apollo: Apollo, private breakpointObserver: BreakpointObserver,
               private breakpointservce: BreakpointObserverService) {
     this.size$ = breakpointservce.size$;
+    this.deviceTypes = [
+      {value: WindowTypes.DESKTOP, label: 'Desktop'},
+      {value: WindowTypes.LAPTOP, label: 'Laptop'},
+      {value: WindowTypes.TABLETS, label: 'Tablet'},
+      {value: WindowTypes.LARGE_PHONE, label: 'Large Phone'},
+      {value: WindowTypes.PHONE, label: 'Phone'}
+    ];
+  }
+
+  ngOnInit() {
+    this.showColumnsByWindowSize();
+    this.getAllItems();
+  }
+
+  getAllItems() {
+    this.apollo
+      .watchQuery({
+        query: GET_ALL_ITEMS
+      })
+      .valueChanges.subscribe(result => {
+        this.items = result.data['items'];
+        this.initGridColumns(result.data['items']);
+      });
+  }
+
+  initGridColumns(data: any) {
+    this.columnDefs = this.generateColumns(data);
+    this.itemsGrid.gridOptions.api.setColumnDefs(this.columnDefs );
+    setTimeout(() => {
+      this.columnDefs = [...this.columnDefs, ...this.cellRenderers];
+      this.itemsGrid.gridOptions.api.setColumnDefs(this.columnDefs );
+      this.itemsGrid.gridOptions.api.sizeColumnsToFit();
+     }, 100);
   }
 
   generateColumns(items: any[]) {
@@ -48,33 +83,6 @@ export class AppComponent implements OnInit {
       }
     }
     return columnDefinitions;
-  }
-
-  ngOnInit() {
-    this.showColumnsByWindowSize();
-    this.getAllItems();
-  }
-
-  getAllItems() {
-    this.apollo
-      .watchQuery({
-        query: GET_ALL_ITEMS
-      })
-      .valueChanges.subscribe(result => {
-        this.items = result.data['items'];
-        this.columnDefs = this.generateColumns(this.items);
-        this.initGridColumns();
-      });
-  }
-
-  initGridColumns() {
-    this.itemsGrid.gridOptions.api.setColumnDefs(this.columnDefs );
-    setTimeout(() => {
-      this.columnDefs = [...this.columnDefs, ...this.cellRenderers];
-      this.itemsGrid.gridOptions.api.setColumnDefs(this.columnDefs );
-      this.itemsGrid.gridOptions.api.sizeColumnsToFit();
-     }, 100);
-    
   }
 
   editCellRenderer() {
@@ -98,7 +106,8 @@ export class AppComponent implements OnInit {
         variables: {
           title: form.value.title,
           price: parseInt(form.value.price),
-          description: form.value.description
+          description: form.value.description,
+          supportDevice: form.value.deviceType,
         },
         refetchQueries: [{
           query: GET_ALL_ITEMS
@@ -112,7 +121,8 @@ export class AppComponent implements OnInit {
           id: this.slectedItem.id,
           title: form.value.title,
           price: parseInt(form.value.price),
-          description: form.value.description
+          description: form.value.description,
+          supportDevice: form.value.deviceType,
         },
         refetchQueries: [{
           query: GET_ALL_ITEMS
@@ -143,7 +153,8 @@ export class AppComponent implements OnInit {
         this.addUpdateForm.setValue({
           title: evt.data.title,
           description: evt.data.description,
-          price: evt.data.price
+          price: evt.data.price,
+          deviceType: evt.data.supportDevice
         });
         this.actionType = 'Update';
         break;
@@ -158,19 +169,7 @@ export class AppComponent implements OnInit {
 
   showColumnsByWindowSize() {
     this.size$.subscribe(value => {
-      this.latestSize = value;
-      if (value === 'md') {
-        this.apollo
-          .watchQuery({
-            query: GET_ALL_ITEMS_MD
-          })
-          .valueChanges.subscribe(result => {
-            this.items = result.data['items'];
-            this.columnDefs = this.generateColumns(this.items);
-            console.log(this.items);
-          });
-      }
+      console.log(value);
     });
   }
-
 }

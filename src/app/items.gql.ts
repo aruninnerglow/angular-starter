@@ -9,7 +9,8 @@ export type Item = {
   name: string;
   title: string;
   description: string;
-}
+  supportDevice: string
+};
 
 
 export const DELETE_ITEM_MUTATION = gql`
@@ -19,27 +20,30 @@ mutation deleteItemMutation($id:String!){
     title
     price
     description
+    supportDevice
   }
 }
 `;
 
 export const CREATE_ITEM_MUTATION = gql`
-mutation createItemMutation($title:String!, $price: Int!, $description: String!){
-  createItem(input:{title: $title, price: $price, description: $description}){
+mutation createItemMutation($title:String!, $price: Int!, $description: String!, $supportDevice: String!){
+  createItem(input:{title: $title, price: $price, description: $description, supportDevice: $supportDevice }){
     title
     price
     description
+    supportDevice
     id
   }
 }
 `;
 
 export const UPDATE_ITEM_MUTATION = gql`
-mutation updateItemMutation($id:String!, $title:String!, $price: Int!, $description: String!){
-  updateItem(id: $id, input:{title: $title, price: $price, description: $description}){
+mutation updateItemMutation($id:String!, $title:String!, $price: Int!, $description: String!, $supportDevice: String!){
+  updateItem(id: $id, input:{title: $title, price: $price, description: $description, supportDevice: $supportDevice}){
     title
     price
     description
+    supportDevice
     id
   }
 }
@@ -52,17 +56,8 @@ query getallitemsQuery
     id,
     title,
     price,
-    description
-  }
-}
-`;
-
-export const GET_ALL_ITEMS_MD =  gql`
-query getallitemsQuery
-{
-  items{
-    title,
-    description
+    description,
+    supportDevice
   }
 }
 `;
