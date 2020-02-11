@@ -1,24 +1,29 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { Observable } from 'rxjs';
+import { Observable, fromEvent, Subscription } from 'rxjs';
 import {  DELETE_ITEM_MUTATION, CREATE_ITEM_MUTATION, UPDATE_ITEM_MUTATION, GET_ALL_ITEMS, } from './items.gql';
-import { GridOptions } from 'ag-grid-community';
+import { GridOptions, ColDef } from 'ag-grid-community';
 import { NgForm } from '@angular/forms';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { BreakpointObserverService } from './services/breakpoint-observer.service';
 import { AgGridAngular } from 'ag-grid-angular';
-import { WindowTypes } from './model';
+import { WindowTypes, GridConfig } from './model';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
-  public size$: Observable<string>;
+export class AppComponent implements OnInit, OnDestroy {
   @ViewChild('addUpdateForm', { static: false }) addUpdateForm: NgForm;
   @ViewChild('itemsGrid', { static: false }) itemsGrid: AgGridAngular;
+
+
+  public size$: Observable<string>;
+  windowResizeObservable$: Observable<Event>;
+  windowResizeSubscription$: Subscription;
+  
   title = 'AngularRX';
   items: any;
   slectedItem: any;
@@ -45,8 +50,17 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.showColumnsByWindowSize();
     this.getAllItems();
+    this.windowResizeObservable$ = fromEvent(window, 'resize');
+    this.windowResizeSubscription$ = this.windowResizeObservable$.subscribe( evt => {
+      setTimeout(() => {
+        this.itemsGrid.gridOptions.api.sizeColumnsToFit();
+       }, 100);
+    });
+  }
+
+  ngOnDestroy() {
+    this.windowResizeSubscription$.unsubscribe();
   }
 
   getAllItems() {
@@ -63,6 +77,7 @@ export class AppComponent implements OnInit {
   initGridColumns(data: any) {
     this.columnDefs = this.generateColumns(data);
     this.itemsGrid.gridOptions.api.setColumnDefs(this.columnDefs );
+    this.showColumnsByWindowSize();
     setTimeout(() => {
       this.columnDefs = [...this.columnDefs, ...this.cellRenderers];
       this.itemsGrid.gridOptions.api.setColumnDefs(this.columnDefs );
@@ -74,8 +89,8 @@ export class AppComponent implements OnInit {
     let columnDefinitions = [];
     // tslint:disable-next-line: forin
     for (const key in items[0]) {
-      if (key !== '__typename' && key !== 'id') {
-        const mappedColumn = {
+      if (key !== '__typename') {
+        const mappedColumn:ColDef = {
           headerName: key.toUpperCase(),
           field: key
         };
@@ -169,7 +184,27 @@ export class AppComponent implements OnInit {
 
   showColumnsByWindowSize() {
     this.size$.subscribe(value => {
-      console.log(value);
+      const columns = this.itemsGrid.gridOptions.columnApi.getAllColumns();
+      if (GridConfig[value] !== GridConfig.DESKTOP) {
+        let count = 0;
+        for (const column of columns) {
+          if (count >= GridConfig[value]) {
+            if (column.getColId() !== 'edit' && column.getColId() !== 'delete' ) {
+              this.itemsGrid.gridOptions.columnApi.setColumnVisible(column, false);
+            }
+          } else {
+            this.itemsGrid.gridOptions.columnApi.setColumnVisible(column, true);
+          }
+          count++;
+        }
+      } else {
+        for (const column of columns) {
+          this.itemsGrid.gridOptions.columnApi.setColumnVisible(column, true);
+        }
+      }
+      setTimeout(() => {
+        this.itemsGrid.gridOptions.api.sizeColumnsToFit();
+       }, 100);
     });
   }
 }
