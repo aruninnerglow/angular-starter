@@ -9,6 +9,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { BreakpointObserverService } from './services/breakpoint-observer.service';
 import { AgGridAngular } from 'ag-grid-angular';
 import { WindowTypes, GridConfig } from './model';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-root',
@@ -23,7 +24,7 @@ export class AppComponent implements OnInit, OnDestroy {
   public size$: Observable<string>;
   windowResizeObservable$: Observable<Event>;
   windowResizeSubscription$: Subscription;
-  
+
   title = 'AngularRX';
   items: any;
   slectedItem: any;
@@ -38,7 +39,8 @@ export class AppComponent implements OnInit, OnDestroy {
   gridOptions: GridOptions;
 
   constructor(private apollo: Apollo, private breakpointObserver: BreakpointObserver,
-              private breakpointservce: BreakpointObserverService) {
+              private breakpointservce: BreakpointObserverService,
+              private toastrSrv: ToastrService) {
     this.size$ = breakpointservce.size$;
     this.deviceTypes = [
       {value: WindowTypes.DESKTOP, label: 'Desktop'},
@@ -128,6 +130,7 @@ export class AppComponent implements OnInit, OnDestroy {
           query: GET_ALL_ITEMS
         }]
       }).subscribe((response) => {
+        this.toastrSrv.success("Added Successfully");
       });
     } else if (this.actionType === 'Update') {
       this.apollo.mutate<any>({
@@ -143,6 +146,7 @@ export class AppComponent implements OnInit, OnDestroy {
           query: GET_ALL_ITEMS
         }]
       }).subscribe((response) => {
+        this.toastrSrv.success("Updated Successfully");
 
       });
     }
@@ -161,6 +165,7 @@ export class AppComponent implements OnInit, OnDestroy {
             query: GET_ALL_ITEMS
           }]
         }).subscribe((response) => {
+          this.toastrSrv.success("Deleted Successfully");
         });
         break;
       case 'edit':

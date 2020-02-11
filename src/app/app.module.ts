@@ -16,6 +16,7 @@ import { AgGridModule } from 'ag-grid-angular';
 import {FormsModule } from '@angular/forms';
 import {LayoutModule} from '@angular/cdk/layout';
 import { BreakpointObserverService } from './services/breakpoint-observer.service';
+import { ToastrModule } from 'ngx-toastr'
 
 @NgModule({
   declarations: [
@@ -24,6 +25,11 @@ import { BreakpointObserverService } from './services/breakpoint-observer.servic
   imports: [
     BrowserModule,
     LayoutModule,
+    ToastrModule.forRoot({
+      timeOut: 5000,
+      positionClass: 'toast-bottom-right',
+      preventDuplicates: true
+    }),
     FormsModule,
     AgGridModule.withComponents(),
     StoreModule.forRoot(reducers, {
