@@ -6,6 +6,14 @@ export enum WindowTypes {
     PHONE = 'PHONE'
   }
 
+export enum SkillRating {
+    NOVICE = 'Novice',
+    BEGINNER = 'Beginner',
+    COMPETENT = 'Competent',
+    PROFICIENT = 'Proficient',
+    EXPORT = 'Export'
+  }
+
 export enum GridConfig {
     DESKTOP = 'ALL',
     LAPTOP = '4',
@@ -13,3 +21,33 @@ export enum GridConfig {
     LARGE_PHONE = '2',
     PHONE = '1'
   }
+
+export class GridColumnConfig {
+  
+  static userGrid = [
+    {
+      headerName:'User ID',
+      field: 'id'
+    },
+    {
+      headerName:'First Name',
+      field: 'title'
+    },
+    {
+      headerName:'Last Name',
+      field: 'description'
+    },
+    {
+      headerName:'Skills',
+      width:'60',
+      field: 'price',
+      cellStyle: {color: 'red',  backgroundColor: '#aaffaa'}
+    },
+    {
+      headerName:'Rating',
+      width:'60',
+      field: 'supportDevice'
+    }
+  ]
+
+}

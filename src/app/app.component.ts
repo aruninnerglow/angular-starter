@@ -8,7 +8,7 @@ import { NgForm } from '@angular/forms';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { BreakpointObserverService } from './services/breakpoint-observer.service';
 import { AgGridAngular } from 'ag-grid-angular';
-import { WindowTypes, GridConfig } from './model';
+import { WindowTypes, GridConfig, GridColumnConfig, SkillRating } from './model';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -43,11 +43,11 @@ export class AppComponent implements OnInit, OnDestroy {
               private toastrSrv: ToastrService) {
     this.size$ = breakpointservce.size$;
     this.deviceTypes = [
-      {value: WindowTypes.DESKTOP, label: 'Desktop'},
-      {value: WindowTypes.LAPTOP, label: 'Laptop'},
-      {value: WindowTypes.TABLETS, label: 'Tablet'},
-      {value: WindowTypes.LARGE_PHONE, label: 'Large Phone'},
-      {value: WindowTypes.PHONE, label: 'Phone'}
+      {value: SkillRating.NOVICE, label: 'Novice'},
+      {value: SkillRating.BEGINNER, label: 'Beginner'},
+      {value: SkillRating.COMPETENT, label: 'Competent'},
+      {value: SkillRating.PROFICIENT, label: 'Proficient'},
+      {value: SkillRating.EXPORT, label: 'Export'}
     ];
   }
 
@@ -72,7 +72,7 @@ export class AppComponent implements OnInit, OnDestroy {
       })
       .valueChanges.subscribe(result => {
         this.items = result.data['items'];
-        this.initGridColumns(result.data['items']);
+        this.initGridColumns(GridColumnConfig.userGrid);
       });
   }
 
@@ -89,15 +89,13 @@ export class AppComponent implements OnInit, OnDestroy {
 
   generateColumns(items: any[]) {
     let columnDefinitions = [];
-    // tslint:disable-next-line: forin
-    for (const key in items[0]) {
-      if (key !== '__typename') {
-        const mappedColumn:ColDef = {
-          headerName: key.toUpperCase(),
-          field: key
-        };
-        columnDefinitions.push(mappedColumn);
+    for(let i=0; i<items.length; i++) {
+      let mappedColumn:ColDef = {};
+      for (const key in items[i]) {
+        mappedColumn[key] = items[i][key];
       }
+      
+      columnDefinitions.push(mappedColumn);
     }
     return columnDefinitions;
   }

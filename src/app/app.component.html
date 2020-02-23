@@ -4,19 +4,19 @@
     <form (ngSubmit)='onAddUpdate(addUpdateForm)' #addUpdateForm="ngForm">
       <div class="form-row">
         <div class="col">
-          <label>Title:</label>
+          <label>First Name:</label>
           <input type="text" class="form-control" id="title" name="title" ngModel required>
         </div>
         <div class="col">
-          <label>Description:</label>
+          <label>Last Name:</label>
           <input type="text" class="form-control" name="description" ngModel required>
         </div>
         <div class="col">
-          <label>Price:</label>
+          <label>Skill:</label>
           <input type="text" class="form-control" name="price" ngModel required>
         </div>
         <div class="col">
-          <label>Device Type:</label>
+          <label>Rating:</label>
           <select class="custom-select" name="deviceType" ngModel>
             <option *ngFor="let device of deviceTypes" [ngValue]="device.value">{{device.label}}</option>
           </select>
@@ -43,7 +43,7 @@
   <!-- <div>{{size$ | async}}</div> --> 
 
   <footer>
-    <p style="text-align: right;">©2020 Cognizant, all rights reserved</p>
+    <p style="text-align: center;">©2020 Cognizant, all rights reserved</p>
   </footer>
 
 </div>
