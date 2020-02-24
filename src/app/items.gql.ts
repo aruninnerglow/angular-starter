@@ -26,7 +26,7 @@ mutation deleteItemMutation($id:String!){
 `;
 
 export const CREATE_ITEM_MUTATION = gql`
-mutation createItemMutation($title:String!, $price: Int!, $description: String!, $supportDevice: String!){
+mutation createItemMutation($title:String!, $price: String!, $description: String!, $supportDevice: String!){
   createItem(input:{title: $title, price: $price, description: $description, supportDevice: $supportDevice }){
     id
     title
@@ -38,7 +38,7 @@ mutation createItemMutation($title:String!, $price: Int!, $description: String!,
 `;
 
 export const UPDATE_ITEM_MUTATION = gql`
-mutation updateItemMutation($id:String!, $title:String!, $price: Int!, $description: String!, $supportDevice: String!){
+mutation updateItemMutation($id:String!, $title:String!, $price: String!, $description: String!, $supportDevice: String!){
   updateItem(id: $id, input:{title: $title, price: $price, description: $description, supportDevice: $supportDevice}){
     id
     title

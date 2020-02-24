@@ -120,7 +120,7 @@ export class AppComponent implements OnInit, OnDestroy {
         mutation: CREATE_ITEM_MUTATION,
         variables: {
           title: form.value.title,
-          price: parseInt(form.value.price),
+          price: form.value.price,
           description: form.value.description,
           supportDevice: form.value.deviceType,
         },
@@ -136,7 +136,7 @@ export class AppComponent implements OnInit, OnDestroy {
         variables: {
           id: this.slectedItem.id,
           title: form.value.title,
-          price: parseInt(form.value.price),
+          price: form.value.price,
           description: form.value.description,
           supportDevice: form.value.deviceType,
         },
