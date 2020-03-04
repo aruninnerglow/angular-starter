@@ -6,10 +6,10 @@ import {  DELETE_ITEM_MUTATION, CREATE_ITEM_MUTATION, UPDATE_ITEM_MUTATION, GET_
 import { GridOptions, ColDef } from 'ag-grid-community';
 import { NgForm } from '@angular/forms';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { BreakpointObserverService } from './services/breakpoint-observer.service';
 import { AgGridAngular } from 'ag-grid-angular';
-import { WindowTypes, GridConfig, GridColumnConfig, SkillRating } from './model';
+import { GridColumnConfig, SkillRating } from './model';
 import { ToastrService } from 'ngx-toastr';
+import { MDDGridService } from './services/MDDGrid.service';
 
 @Component({
   selector: 'app-root',
@@ -19,9 +19,6 @@ import { ToastrService } from 'ngx-toastr';
 export class AppComponent implements OnInit, OnDestroy {
   @ViewChild('addUpdateForm', { static: false }) addUpdateForm: NgForm;
   @ViewChild('itemsGrid', { static: false }) itemsGrid: AgGridAngular;
-
-
-  public size$: Observable<string>;
   windowResizeObservable$: Observable<Event>;
   windowResizeSubscription$: Subscription;
 
@@ -32,16 +29,17 @@ export class AppComponent implements OnInit, OnDestroy {
   actionType = 'Add';
   deviceTypes: any;
   columnDefs = [];
-  cellRenderers = [
-    { headerName: 'EDIT', field: 'edit', cellRenderer: this.editCellRenderer, cellStyle: { 'text-align': 'center' }, width: 80},
-    { headerName: 'DELETE', field: 'delete', cellRenderer: this.deleteCellRenderer, cellStyle: { 'text-align': 'center'}, width: 80, },
-  ];
+  cellRenderers = []
   gridOptions: GridOptions;
 
   constructor(private apollo: Apollo, private breakpointObserver: BreakpointObserver,
-              private breakpointservce: BreakpointObserverService,
+              private mddGridService:MDDGridService,
               private toastrSrv: ToastrService) {
-    this.size$ = breakpointservce.size$;
+
+    this.cellRenderers = [
+    { headerName: 'EDIT', field: 'edit', cellRenderer: this.mddGridService.getEditCellRenderer, cellStyle: { 'text-align': 'center' }, width: 80},
+    { headerName: 'DELETE', field: 'delete', cellRenderer: this.mddGridService.getDeleteCellRenderer, cellStyle: { 'text-align': 'center'}, width: 80, },
+    ];
     this.deviceTypes = [
       {value: SkillRating.NOVICE, label: 'Novice'},
       {value: SkillRating.BEGINNER, label: 'Beginner'},
@@ -77,41 +75,14 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   initGridColumns(data: any) {
-    this.columnDefs = this.generateColumns(data);
+    this.columnDefs = data; //this.generateColumns(data);
     this.itemsGrid.gridOptions.api.setColumnDefs(this.columnDefs );
-    this.showColumnsByWindowSize();
+    this.mddGridService.showColumnsByWindowSize(this.itemsGrid);
     setTimeout(() => {
       this.columnDefs = [...this.columnDefs, ...this.cellRenderers];
       this.itemsGrid.gridOptions.api.setColumnDefs(this.columnDefs );
       this.itemsGrid.gridOptions.api.sizeColumnsToFit();
      }, 100);
-  }
-
-  generateColumns(items: any[]) {
-    let columnDefinitions = [];
-    for(let i=0; i<items.length; i++) {
-      let mappedColumn:ColDef = {};
-      for (const key in items[i]) {
-        mappedColumn[key] = items[i][key];
-      }
-      
-      columnDefinitions.push(mappedColumn);
-    }
-    return columnDefinitions;
-  }
-
-  editCellRenderer() {
-    const eGui = document.createElement('span');
-    const icon = '/assets/icons/edit.png';
-    eGui.innerHTML = '<img width="20px" style="cursor: pointer;" src="' + icon + '" />';
-    return eGui;
-  }
-
-  deleteCellRenderer() {
-    const eGui = document.createElement('span');
-    const icon = '/assets/icons/delete.png';
-    eGui.innerHTML = '<img width="20px" style="cursor: pointer;" src="' + icon + '" />';
-    return eGui;
   }
 
   onAddUpdate(form) {
@@ -185,29 +156,5 @@ export class AppComponent implements OnInit, OnDestroy {
     this.actionType = 'Add';
   }
 
-  showColumnsByWindowSize() {
-    this.size$.subscribe(value => {
-      const columns = this.itemsGrid.gridOptions.columnApi.getAllColumns();
-      if (GridConfig[value] !== GridConfig.DESKTOP) {
-        let count = 0;
-        for (const column of columns) {
-          if (count >= GridConfig[value]) {
-            if (column.getColId() !== 'edit' && column.getColId() !== 'delete' ) {
-              this.itemsGrid.gridOptions.columnApi.setColumnVisible(column, false);
-            }
-          } else {
-            this.itemsGrid.gridOptions.columnApi.setColumnVisible(column, true);
-          }
-          count++;
-        }
-      } else {
-        for (const column of columns) {
-          this.itemsGrid.gridOptions.columnApi.setColumnVisible(column, true);
-        }
-      }
-      setTimeout(() => {
-        this.itemsGrid.gridOptions.api.sizeColumnsToFit();
-       }, 100);
-    });
-  }
+
 }
